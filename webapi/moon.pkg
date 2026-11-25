@@ -11,7 +11,12 @@ options(
   link: {
     "js": {
       "format": "iife",
-      "exports": [ "solve_puzzle", "derive_puzzle", "generate_puzzle" ],
+      "exports": [
+        "solve_puzzle",
+        "validate_puzzle",
+        "derive_puzzle",
+        "generate_puzzle",
+      ],
     },
   },
 )

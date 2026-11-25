@@ -173,7 +173,7 @@ function solve() {
 }
 function importPuzzle(source) {
   if (source.length > 32768) { message("Puzzle file exceeds 32 KiB."); return false; }
-  const {result} = analyze(source);
+  const result = run("validate_puzzle", source);
   if (result.error) { message(result.error); return false; }
   showPuzzle(result.puzzle);
   return true;
@@ -216,8 +216,16 @@ $("generate").onclick = () => {
 $("load").onchange = async event => {
   const file=event.target.files[0];
   if(file) {
-    try { if(file.size>32768) message("Puzzle file exceeds 32 KiB."); else importPuzzle(await file.text()); }
-    catch { message("Unable to read the puzzle file."); }
+    try {
+      if (file.size > 32768) {
+        message("Puzzle file exceeds 32 KiB.");
+      } else {
+        const source = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
+        importPuzzle(source);
+      }
+    } catch {
+      message("Unable to read the puzzle file as UTF-8.");
+    }
   }
   event.target.value="";
 };
@@ -268,6 +276,8 @@ if (location.search === "?probe") {
     assert(!editing && exportText() === await exported.text(), "file round trip");
     await load(JSON.stringify({...sample, version:2}));
     assert($("status").textContent.includes("UnsupportedVersion"), "invalid file");
+    await load(new Uint8Array([0xC3, 0x28]));
+    assert($("status").textContent.includes("UTF-8"), "malformed UTF-8");
     $("edit").click(); cells[0].click(); $("derive").click();
     assert(puzzle.rows[0][0] === 1, "derive");
     $("seed").value = "7"; $("generate").click();

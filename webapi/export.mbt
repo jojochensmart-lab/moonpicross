@@ -72,3 +72,11 @@ pub fn generate_puzzle(size : Int32, seed : UInt32, target : String) -> String {
     Err(e) => error(@debug.to_string(e))
   }
 }
+
+///|
+pub fn validate_puzzle(source : String) -> String {
+  match @core.Puzzle::from_json(source) {
+    Ok(puzzle) => Json::object({ "puzzle": puzzle.to_json() }).stringify()
+    Err(e) => error(@debug.to_string(e))
+  }
+}
