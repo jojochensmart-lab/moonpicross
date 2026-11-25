@@ -1072,3 +1072,722 @@ test "independent 4x4 and 5x5 oracle" {
     @core.Status::Unique,
   )
 }
+
+///|
+test "line candidate sets equal brute-force masks through length 8" {
+  {
+    let candidates = @core.line_patterns(1, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(1, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1])
+  }
+  {
+    let candidates = @core.line_patterns(2, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(2, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2])
+  }
+  {
+    let candidates = @core.line_patterns(2, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3])
+  }
+  {
+    let candidates = @core.line_patterns(3, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(3, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4])
+  }
+  {
+    let candidates = @core.line_patterns(3, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6])
+  }
+  {
+    let candidates = @core.line_patterns(3, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [5])
+  }
+  {
+    let candidates = @core.line_patterns(3, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7])
+  }
+  {
+    let candidates = @core.line_patterns(4, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(4, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4, 8])
+  }
+  {
+    let candidates = @core.line_patterns(4, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6, 12])
+  }
+  {
+    let candidates = @core.line_patterns(4, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [5, 9, 10])
+  }
+  {
+    let candidates = @core.line_patterns(4, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7, 14])
+  }
+  {
+    let candidates = @core.line_patterns(4, [2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [11])
+  }
+  {
+    let candidates = @core.line_patterns(4, [1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [13])
+  }
+  {
+    let candidates = @core.line_patterns(4, [4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [15])
+  }
+  {
+    let candidates = @core.line_patterns(5, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(5, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4, 8, 16])
+  }
+  {
+    let candidates = @core.line_patterns(5, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6, 12, 24])
+  }
+  {
+    let candidates = @core.line_patterns(5, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [5, 9, 10, 17, 18, 20])
+  }
+  {
+    let candidates = @core.line_patterns(5, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7, 14, 28])
+  }
+  {
+    let candidates = @core.line_patterns(5, [2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [11, 19, 22])
+  }
+  {
+    let candidates = @core.line_patterns(5, [1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [13, 25, 26])
+  }
+  {
+    let candidates = @core.line_patterns(5, [4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [15, 30])
+  }
+  {
+    let candidates = @core.line_patterns(5, [1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [21])
+  }
+  {
+    let candidates = @core.line_patterns(5, [3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [23])
+  }
+  {
+    let candidates = @core.line_patterns(5, [2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [27])
+  }
+  {
+    let candidates = @core.line_patterns(5, [1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [29])
+  }
+  {
+    let candidates = @core.line_patterns(5, [5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [31])
+  }
+  {
+    let candidates = @core.line_patterns(6, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4, 8, 16, 32])
+  }
+  {
+    let candidates = @core.line_patterns(6, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6, 12, 24, 48])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [5, 9, 10, 17, 18, 20, 33, 34, 36, 40])
+  }
+  {
+    let candidates = @core.line_patterns(6, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7, 14, 28, 56])
+  }
+  {
+    let candidates = @core.line_patterns(6, [2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [11, 19, 22, 35, 38, 44])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [13, 25, 26, 49, 50, 52])
+  }
+  {
+    let candidates = @core.line_patterns(6, [4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [15, 30, 60])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [21, 37, 41, 42])
+  }
+  {
+    let candidates = @core.line_patterns(6, [3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [23, 39, 46])
+  }
+  {
+    let candidates = @core.line_patterns(6, [2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [27, 51, 54])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [29, 57, 58])
+  }
+  {
+    let candidates = @core.line_patterns(6, [5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [31, 62])
+  }
+  {
+    let candidates = @core.line_patterns(6, [2, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [43])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [45])
+  }
+  {
+    let candidates = @core.line_patterns(6, [4, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [47])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [53])
+  }
+  {
+    let candidates = @core.line_patterns(6, [3, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [55])
+  }
+  {
+    let candidates = @core.line_patterns(6, [2, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [59])
+  }
+  {
+    let candidates = @core.line_patterns(6, [1, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [61])
+  }
+  {
+    let candidates = @core.line_patterns(6, [6], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [63])
+  }
+  {
+    let candidates = @core.line_patterns(7, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4, 8, 16, 32, 64])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6, 12, 24, 48, 96])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [
+      5, 9, 10, 17, 18, 20, 33, 34, 36, 40, 65, 66, 68, 72, 80,
+    ])
+  }
+  {
+    let candidates = @core.line_patterns(7, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7, 14, 28, 56, 112])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [11, 19, 22, 35, 38, 44, 67, 70, 76, 88])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [13, 25, 26, 49, 50, 52, 97, 98, 100, 104])
+  }
+  {
+    let candidates = @core.line_patterns(7, [4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [15, 30, 60, 120])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [21, 37, 41, 42, 69, 73, 74, 81, 82, 84])
+  }
+  {
+    let candidates = @core.line_patterns(7, [3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [23, 39, 46, 71, 78, 92])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [27, 51, 54, 99, 102, 108])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [29, 57, 58, 113, 114, 116])
+  }
+  {
+    let candidates = @core.line_patterns(7, [5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [31, 62, 124])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [43, 75, 83, 86])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [45, 77, 89, 90])
+  }
+  {
+    let candidates = @core.line_patterns(7, [4, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [47, 79, 94])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [53, 101, 105, 106])
+  }
+  {
+    let candidates = @core.line_patterns(7, [3, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [55, 103, 110])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [59, 115, 118])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [61, 121, 122])
+  }
+  {
+    let candidates = @core.line_patterns(7, [6], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [63, 126])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [85])
+  }
+  {
+    let candidates = @core.line_patterns(7, [3, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [87])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [91])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [93])
+  }
+  {
+    let candidates = @core.line_patterns(7, [5, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [95])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [107])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [109])
+  }
+  {
+    let candidates = @core.line_patterns(7, [4, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [111])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [117])
+  }
+  {
+    let candidates = @core.line_patterns(7, [3, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [119])
+  }
+  {
+    let candidates = @core.line_patterns(7, [2, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [123])
+  }
+  {
+    let candidates = @core.line_patterns(7, [1, 5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [125])
+  }
+  {
+    let candidates = @core.line_patterns(7, [7], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [127])
+  }
+  {
+    let candidates = @core.line_patterns(8, [], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [0])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [1, 2, 4, 8, 16, 32, 64, 128])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [3, 6, 12, 24, 48, 96, 192])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [
+      5, 9, 10, 17, 18, 20, 33, 34, 36, 40, 65, 66, 68, 72, 80, 129, 130, 132, 136,
+      144, 160,
+    ])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [7, 14, 28, 56, 112, 224])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [
+      11, 19, 22, 35, 38, 44, 67, 70, 76, 88, 131, 134, 140, 152, 176,
+    ])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [
+      13, 25, 26, 49, 50, 52, 97, 98, 100, 104, 193, 194, 196, 200, 208,
+    ])
+  }
+  {
+    let candidates = @core.line_patterns(8, [4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [15, 30, 60, 120, 240])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [
+      21, 37, 41, 42, 69, 73, 74, 81, 82, 84, 133, 137, 138, 145, 146, 148, 161,
+      162, 164, 168,
+    ])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [23, 39, 46, 71, 78, 92, 135, 142, 156, 184])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [27, 51, 54, 99, 102, 108, 195, 198, 204, 216])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [29, 57, 58, 113, 114, 116, 225, 226, 228, 232])
+  }
+  {
+    let candidates = @core.line_patterns(8, [5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [31, 62, 124, 248])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [43, 75, 83, 86, 139, 147, 150, 163, 166, 172])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [45, 77, 89, 90, 141, 153, 154, 177, 178, 180])
+  }
+  {
+    let candidates = @core.line_patterns(8, [4, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [47, 79, 94, 143, 158, 188])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [53, 101, 105, 106, 197, 201, 202, 209, 210, 212])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [55, 103, 110, 199, 206, 220])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [59, 115, 118, 227, 230, 236])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [61, 121, 122, 241, 242, 244])
+  }
+  {
+    let candidates = @core.line_patterns(8, [6], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [63, 126, 252])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [85, 149, 165, 169, 170])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [87, 151, 167, 174])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [91, 155, 179, 182])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [93, 157, 185, 186])
+  }
+  {
+    let candidates = @core.line_patterns(8, [5, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [95, 159, 190])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [107, 203, 211, 214])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [109, 205, 217, 218])
+  }
+  {
+    let candidates = @core.line_patterns(8, [4, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [111, 207, 222])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [117, 229, 233, 234])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [119, 231, 238])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [123, 243, 246])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [125, 249, 250])
+  }
+  {
+    let candidates = @core.line_patterns(8, [7], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [127, 254])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 1, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [171])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 2, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [173])
+  }
+  {
+    let candidates = @core.line_patterns(8, [4, 1, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [175])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [181])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 2, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [183])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 3, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [187])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 4, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [189])
+  }
+  {
+    let candidates = @core.line_patterns(8, [6, 1], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [191])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [213])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 1, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [215])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 2, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [219])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 3, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [221])
+  }
+  {
+    let candidates = @core.line_patterns(8, [5, 2], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [223])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 1, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [235])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 2, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [237])
+  }
+  {
+    let candidates = @core.line_patterns(8, [4, 3], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [239])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 1, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [245])
+  }
+  {
+    let candidates = @core.line_patterns(8, [3, 4], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [247])
+  }
+  {
+    let candidates = @core.line_patterns(8, [2, 5], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [251])
+  }
+  {
+    let candidates = @core.line_patterns(8, [1, 6], 300000).unwrap()
+    candidates.sort()
+    assert_eq(candidates, [253])
+  }
+  let candidates = @core.line_patterns(8, [8], 300000).unwrap()
+  candidates.sort()
+  assert_eq(candidates, [255])
+}

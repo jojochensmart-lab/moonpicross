@@ -66,5 +66,20 @@ for n in (4,5):
             lines.append(f"  assert_eq(@core.solve({mbt(rows)}, {mbt(cols)}, @core.Limits::default()).status, @core.Status::{expected})")
     stats[n] = dict(out)
 lines += ['}']
+lines += ["///|", 'test "line candidate sets equal brute-force masks through length 8" {']
+line_groups = 0
+patterns = 0
+for n in range(1, 9):
+    catalog = {}
+    for mask in range(1 << n):
+        hints = clue([(mask >> i) & 1 for i in range(n)])
+        catalog.setdefault(hints, []).append(mask)
+        patterns += 1
+    for hints, masks in catalog.items():
+        line_groups += 1
+        lines += ["  {", f"    let candidates = @core.line_patterns({n}, {list(hints)}, 300000).unwrap()",
+                  "    candidates.sort()", f"    assert_eq(candidates, {masks})", "  }"]
+lines += ["}"]
+print("candidate catalogs:", line_groups, "line masks:", patterns)
 Path("core/oracle_test.mbt").write_text("\n".join(lines)+"\n", encoding="utf-8")
 print("3x3",dict(Counter(codes)),"4x4 / 5x5",stats)
