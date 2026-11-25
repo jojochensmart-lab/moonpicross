@@ -1,4 +1,5 @@
 """Inspect the candidate archive and compile a fresh consumer of its extracted core."""
+import argparse
 import hashlib
 import re
 import shutil
@@ -11,7 +12,10 @@ from zipfile import ZipFile
 root = Path(__file__).resolve().parents[1]
 manifest = (root / "moon.mod").read_text(encoding="utf-8")
 version = re.search(r'(?m)^version = "([^"]+)"', manifest).group(1)
-archive = root / f"_build/publish/jojochensmart-lab-moonpicross-{version}.zip"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--canonical", type=Path, help="Verify a canonical source ZIP with LF-normalized text")
+args = parser.parse_args()
+archive = args.canonical or root / f"_build/publish/jojochensmart-lab-moonpicross-{version}.zip"
 workspace = Path(tempfile.mkdtemp(prefix="consumer-", dir=root / "_build"))
 lib, consumer = workspace / "library", workspace / "consumer"
 consumer.mkdir()
@@ -40,7 +44,10 @@ with ZipFile(archive) as package:
         if str(name) != "tests/package_smoke.py":
             assert not any(pattern.search(content) for pattern in sensitive), f"Sensitive pattern in {name}"
     for name in ("README.md", "LICENSE", "moon.mod"):
-        assert package.read(name) == (root / name).read_bytes(), f"Archive mismatch: {name}"
+        expected = (root / name).read_bytes()
+        if args.canonical:
+            expected = expected.replace(b"\r\n", b"\n")
+        assert package.read(name) == expected, f"Archive mismatch: {name}"
     for field, expected in {"name": "jojochensmart-lab/moonpicross", "version": version,
                             "license": "Apache-2.0",
                             "repository": "https://github.com/jojochensmart-lab/moonpicross"}.items():
