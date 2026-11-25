@@ -1,14 +1,26 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>MoonPicross Studio</title>
-<style>
-body{font:16px system-ui;background:#f6f7fb;color:#20233a;margin:3rem auto;max-width:34rem;padding:0 1rem}
-#board{display:grid;grid-template-columns:repeat(6,2.6rem);gap:.25rem;margin:1rem 0}
-#board>*{display:grid;place-items:center;height:2.6rem}
-.cell{border:1px solid #8a91a7;background:white;border-radius:4px}
-.cell.on{background:#324884;color:white} button{cursor:pointer}
-</style>
-<h1>MoonPicross Studio</h1>
-<div id="board" aria-label="5 by 5 puzzle"></div>
-<button id="solve">Solve with MoonBit</button><p id="result" aria-live="polite"></p>
-<script src="engine.js"></script><script src="app.js"></script></html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MoonPicross Studio</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<main>
+  <header><h1>MoonPicross Studio</h1><p>Play, verify and create nonograms offline.</p></header>
+  <section class="tools" aria-label="Puzzle tools">
+    <button id="sample">Load example</button><button id="reset">Reset marks</button>
+    <button id="solve" class="primary">Solve and verify</button>
+    <button id="save">Export JSON</button><label class="file">Import JSON <input id="load" type="file" accept=".json,application/json"></label>
+  </section>
+  <div id="board-shell"><div id="board" aria-label="Nonogram grid"></div></div>
+  <p id="status" role="status"></p>
+  <section class="tools" aria-label="Creation tools">
+    <label>Size <input id="size" type="number" min="5" max="15" value="5"></label>
+    <label>Seed <input id="seed" type="number" min="0" max="4294967295" value="7"></label>
+    <label>Difficulty <select id="level"><option value="">Any</option><option>Easy</option><option>Normal</option><option>Hard</option><option>Expert</option></select></label>
+    <button id="generate">Generate unique puzzle</button><button id="edit">Start blank editor</button><button id="derive" disabled>Apply clues from drawing</button>
+  </section>
+  <section aria-label="Analysis"><p id="metrics"></p>
+    <details id="trace"><summary>Solver trace</summary><ol id="steps"></ol></details>
+  </section>
+</main>
+<script src="engine.js"></script><script src="app.js"></script>
+</body></html>
