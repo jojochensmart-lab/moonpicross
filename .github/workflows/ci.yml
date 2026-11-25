@@ -72,3 +72,24 @@ jobs:
           moon test --target native
       - run: moon package --list
       - run: python tests/package_smoke.py
+      - name: Prepare release evidence
+        shell: pwsh
+        run: |
+          $label = if ($env:RUNNER_OS -eq 'Windows') { 'windows' } else { 'linux' }
+          python -X utf8 scripts/release-evidence.py prepare --label $label --raw _build/publish/jojochensmart-lab-moonpicross-0.2.0.zip --out _build/release-evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -X utf8 tests/package_smoke.py --canonical "_build/release-evidence/$label-v020-source.zip"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($env:RUNNER_OS -eq 'Linux') {
+            $env:MOONPICROSS_EDGE = (Get-Command google-chrome -ErrorAction Stop).Source
+          }
+          python -X utf8 scripts/release-evidence.py verify-studio "_build/release-evidence/$label-v020-studio.zip"
+          exit $LASTEXITCODE
+      - name: Upload verified release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-v020-release-evidence
+          path: _build/release-evidence/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

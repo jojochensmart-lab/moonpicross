@@ -13,9 +13,11 @@ root = Path(__file__).resolve().parents[1]
 manifest = (root / "moon.mod").read_text(encoding="utf-8")
 version = re.search(r'(?m)^version = "([^"]+)"', manifest).group(1)
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--canonical", type=Path, help="Verify a canonical source ZIP with LF-normalized text")
+source = parser.add_mutually_exclusive_group()
+source.add_argument("--external", type=Path, help="Verify a downloaded raw archive, allowing CRLF in documents")
+source.add_argument("--canonical", type=Path, help="Verify a canonical source ZIP with LF-normalized text")
 args = parser.parse_args()
-archive = args.canonical or root / f"_build/publish/jojochensmart-lab-moonpicross-{version}.zip"
+archive = args.canonical or args.external or root / f"_build/publish/jojochensmart-lab-moonpicross-{version}.zip"
 workspace = Path(tempfile.mkdtemp(prefix="consumer-", dir=root / "_build"))
 lib, consumer = workspace / "library", workspace / "consumer"
 consumer.mkdir()
@@ -45,9 +47,12 @@ with ZipFile(archive) as package:
             assert not any(pattern.search(content) for pattern in sensitive), f"Sensitive pattern in {name}"
     for name in ("README.md", "LICENSE", "moon.mod"):
         expected = (root / name).read_bytes()
-        if args.canonical:
+        actual = package.read(name)
+        if args.external:
+            actual = actual.replace(b"\r\n", b"\n")
+        if args.external or args.canonical:
             expected = expected.replace(b"\r\n", b"\n")
-        assert package.read(name) == expected, f"Archive mismatch: {name}"
+        assert actual == expected, f"Archive mismatch: {name}"
     for field, expected in {"name": "jojochensmart-lab/moonpicross", "version": version,
                             "license": "Apache-2.0",
                             "repository": "https://github.com/jojochensmart-lab/moonpicross"}.items():
