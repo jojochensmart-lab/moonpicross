@@ -20,3 +20,13 @@
 ## 本次冻结记录
 
 此前各项 PASS 适用于注明的候选及准备阶段。最终提交的独立检出测试、实际 SHA、提交数、文件清单和 ZIP 哈希由 _build/v020-final-freeze/FINAL_FREEZE.md 与 SHA256SUMS 记录。候选 CI 通过不能替代最终提交的 Windows/Linux 验证。
+
+## 第十六轮产物门槛
+
+| 状态 | 验收项 | 证据 |
+|---|---|---|
+| PASS | 本地新流程 | 规范化重复与元数据扰动、解包消费和真实 Edge 往返均通过。 |
+| BLOCKED | 新 Windows/Linux 运行及上传 | 尚无此候选的新远程授权，不能沿用旧 CI 结果。 |
+| BLOCKED | 跨平台逐文件及规范化字节对账 | 缺两份 Runner 实物。历史清单一致与本地实验不能填补。 |
+
+详见 [跨平台发布包审计](V020_CROSS_PLATFORM_PACKAGE_AUDIT.md) 和 [发布审批材料](V020_FINAL_APPROVAL_REPORT.md)。
