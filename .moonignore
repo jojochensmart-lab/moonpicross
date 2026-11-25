@@ -1,5 +1,10 @@
 /studio/
 /webapi/
+/scripts/
 /research.json
-/docs/
+/docs/*AUDIT.md
+/docs/*REPORT.md
+/docs/COMPETITION_REQUIREMENTS.md
+/docs/APPLICATION_FACTS.md
 /*.log
+/*.csv
