@@ -3,6 +3,7 @@ package "jojochensmart-lab/moonpicross/core"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -10,15 +11,34 @@ pub fn clue_for(Array[Int32]) -> Array[Int32]
 
 pub fn clues(Array[Int32], Int32, Int32) -> (Array[Array[Int32]], Array[Array[Int32]])
 
-pub fn generate(Int32, UInt32, Int32, Int32, Limits) -> Result[Generated, GenerationError]
+pub fn difficulty(SolveResult) -> DifficultyReport
+
+pub fn generate(Int32, UInt32, Int32, Int32, Limits, target? : String?, observe? : (SolveResult) -> Unit) -> Result[Generated, GenerationError]
 
 pub fn line_patterns(Int32, Array[Int32], Int32) -> Result[Array[Int32], Status]
 
-pub fn solve(Array[Array[Int32]], Array[Array[Int32]], Limits) -> SolveResult
+pub fn solve(Array[Array[Int32]], Array[Array[Int32]], Limits, trace? : Int32) -> SolveResult
 
 // Errors
 
 // Types and methods
+pub(all) enum Cell {
+  Unknown
+  Black
+  White
+} derive(Eq, @debug.Debug)
+
+pub(all) struct DifficultyReport {
+  level : String
+  candidates : Int32
+  largest : Int32
+  rounds : Int32
+  nodes : Int32
+  backtracks : Int32
+  scans : Int32
+  forced_by_round : Array[Int32]
+} derive(ToJson)
+
 pub(all) struct Generated {
   rows : Array[Array[Int32]]
   cols : Array[Array[Int32]]
@@ -27,10 +47,26 @@ pub(all) struct Generated {
   result : SolveResult
 }
 
+pub(all) struct GenerationConfig {
+  size : Int32
+  seed : UInt32
+  density : Int32
+  attempts : Int32
+  limits : Limits
+  level : String?
+}
+pub fn GenerationConfig::run(Self) -> Result[Generated, GenerationError]
+
 pub(all) enum GenerationError {
   InvalidOptions
   AttemptLimit
   Invariant
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Grid {
+  height : Int32
+  width : Int32
+  cells : Array[Cell]
 } derive(Eq, @debug.Debug)
 
 pub(all) struct Limits {
@@ -40,6 +76,7 @@ pub(all) struct Limits {
 }
 pub fn Limits::default() -> Self
 
+#alias(SolverStats)
 pub(all) struct Metrics {
   mut patterns : Int32
   mut largest : Int32
@@ -50,11 +87,40 @@ pub(all) struct Metrics {
   forced_by_round : Array[Int32]
 }
 
+pub(all) struct Puzzle {
+  version : Int32
+  rows : Array[Array[Int32]]
+  cols : Array[Array[Int32]]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Puzzle::from_grid(Grid) -> Result[Self, PuzzleError]
+pub fn Puzzle::from_json(String) -> Result[Self, PuzzleError]
+pub fn Puzzle::solve(Self, Limits, trace? : Int32) -> Result[SolveResult, PuzzleError]
+pub fn Puzzle::validate(Self) -> Result[Unit, PuzzleError]
+
+pub(all) enum PuzzleError {
+  InvalidDimensions
+  InvalidClue
+  IncompleteGrid
+  InvalidFormat
+  UnsupportedVersion
+} derive(Eq, @debug.Debug)
+
 pub(all) struct SolveResult {
   status : Status
   first : Array[Int32]?
+  steps : Array[SolveStep]
+  trace_truncated : Bool
   metrics : Metrics
 }
+
+pub(all) struct SolveStep {
+  kind : String
+  line : Int32
+  candidates : Int32
+  indices : Array[Int32]
+  values : Array[Int32]
+  depth : Int32
+} derive(ToJson)
 
 pub(all) enum Status {
   NoSolution
@@ -65,5 +131,8 @@ pub(all) enum Status {
 } derive(Eq, @debug.Debug)
 
 // Type aliases
+pub type ColumnClue = Array[Int32]
+
+pub type RowClue = Array[Int32]
 
 // Traits

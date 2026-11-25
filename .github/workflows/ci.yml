@@ -39,6 +39,8 @@ jobs:
       - run: moon run examples/generate --target wasm-gc
       - run: node scripts/build-studio.mjs
       - run: node scripts/test-studio.mjs
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
       - name: Windows Native
         if: runner.os == 'Windows'
         shell: pwsh
@@ -47,3 +49,4 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           moon test --target native
       - run: moon package --list
+      - run: python tests/package_smoke.py
