@@ -26,4 +26,4 @@ Wasm GC release, seeds 1–100 per size, 45% density, at most 24 attempts, no di
 
 Timing includes failed seeds and depends on the host. A sampled 30×30 solve returned Budget, and the three sampled generation seeds at that size hit AttemptLimit. Those are explicit outcomes at the upper size limit. Browser generation defaults favor the smaller tested sizes.
 
-The release run repeated the full 300-seed survey and obtained the same success counts. See [release verification](FINAL_RELEASE_ACCEPTANCE_REPORT.md).
+The release run repeated the full 300-seed survey and obtained the same success counts. See [release verification](https://github.com/jojochensmart-lab/moonpicross/blob/077e40d84e68c9dac353fb80f49d90bf90680ae4/docs/FINAL_RELEASE_ACCEPTANCE_REPORT.md).

@@ -1,13 +1,23 @@
 # Release and verification
 
-- Core version 0.1.0 is on [Mooncakes](https://mooncakes.io/docs/jojochensmart-lab/moonpicross).
-- Browser Studio is public on [GitHub Pages](https://jojochensmart-lab.github.io/moonpicross/).
-- The offline ZIP is attached to [v0.1.0](https://github.com/jojochensmart-lab/moonpicross/releases/tag/v0.1.0).
-- Actual platform, browser and downstream installation results are recorded in the [acceptance report](FINAL_RELEASE_ACCEPTANCE_REPORT.md).
+Mooncakes and the online and downloadable Studio still serve 0.1.0. The v0.2.0 code candidate is 077e40d84e68c9dac353fb80f49d90bf90680ae4. Its Windows and Linux jobs passed. This revision prepares the release documentation and archive tooling. [Published module](https://mooncakes.io/docs/jojochensmart-lab/moonpicross) · [Candidate CI](https://github.com/jojochensmart-lab/moonpicross/actions/runs/45604621651)
 
-## Releasing a new version
+## Local packaging
 
-1. Agree on the SemVer change. Run the source tests, browser probe and package consumer checks. Review the archived LICENSE and README before publication.
-2. Push the reviewed commit, confirm Linux and Windows CI, and run the Pages probe against the deployed site.
-3. Confirm the new release tag and registry version are unused. Check the authorized account and module namespace. Validate the archive through moon publish --dry-run where supported. Publish only the intended version.
-4. Verify the public registry page and add the exact version in a new project with no local module override. Run check, test and both examples. Confirm that the public Release tag points to the intended code.
+~~~sh
+moon package --list
+python tests/package_smoke.py
+python tests/release_zip.py canonicalize _build/publish/jojochensmart-lab-moonpicross-0.2.0.zip _build/moonpicross-0.2.0-source.zip
+python tests/package_smoke.py --canonical _build/moonpicross-0.2.0-source.zip
+~~~
+
+Use a fresh canonical output path on each run. The script preserves every safe file entry, normalizes CRLF to LF for known UTF-8 source and documentation files, and fixes order, timestamp, mode and compression for the portable source ZIP. The regular MoonBit tool still creates the Mooncakes input. The canonical source ZIP is suitable as a separately identified offline source asset. It makes no assertion about the registry-generated archive or the browser build.
+
+## After release authorization
+
+1. Review the final diff and verify the release branch SHA. Run CI on that SHA. Preserve the existing v0.1.0 release.
+2. Save the unmodified MoonBit archive from each release job as a downloadable artifact before the runner is removed. Retain the listed hash and canonical archive separately.
+3. Compare paths, decompressed member hashes and ZIP attributes with python tests/release_zip.py compare. Run the isolated consumer on the exact archive selected for distribution.
+4. Check the intended version and account before creating the approved release and registry entry. Verify registry availability and install the exact 0.2.0 version in a new project with no local workspace override. Run all three examples and the budget check. Verify any separately approved Pages deployment.
+
+The source repository includes docs/V020_FINAL_RELEASE_CHECKLIST.md and docs/V020_ZIP_CONSISTENCY_AUDIT.md. The completed local freeze record and SHA256SUMS are generated under _build/v020-final-freeze/.

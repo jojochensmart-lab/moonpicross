@@ -15,4 +15,4 @@
 
 ## Formal release
 
-Published v0.1.0 with the original development history, Windows/Linux CI, Pages, offline archive and a verified independent install from Mooncakes. [Full evidence](FINAL_RELEASE_ACCEPTANCE_REPORT.md)
+Published v0.1.0 with the original development history, Windows/Linux CI, Pages, offline archive and a verified independent install from Mooncakes. [Full evidence](https://github.com/jojochensmart-lab/moonpicross/blob/077e40d84e68c9dac353fb80f49d90bf90680ae4/docs/FINAL_RELEASE_ACCEPTANCE_REPORT.md)

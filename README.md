@@ -4,7 +4,7 @@ MoonPicross is a MoonBit library for solving, generating and verifying black-and
 
 [Online Studio](https://jojochensmart-lab.github.io/moonpicross/) · [Offline download](https://github.com/jojochensmart-lab/moonpicross/releases/tag/v0.1.0) · [GitHub](https://github.com/jojochensmart-lab/moonpicross) · [Mooncakes](https://mooncakes.io/docs/jojochensmart-lab/moonpicross)
 
-The development branch targets v0.2.0. The public installation and demo links below point to the released v0.1.0. See the [candidate report](docs/V020_ACCEPTANCE_REPORT.md).
+The development branch contains the v0.2.0 candidate. Mooncakes, the public demo and the offline release currently provide v0.1.0. The v0.2.0 candidate has passed [Windows and Linux CI](https://github.com/jojochensmart-lab/moonpicross/actions/runs/45604621651).
 
 ## Install the core
 
@@ -13,6 +13,8 @@ In an existing MoonBit module, add the versioned dependency:
 ~~~sh
 moon add jojochensmart-lab/moonpicross@0.1.0
 ~~~
+
+For v0.2.0 before registry publication, extract the candidate ZIP next to your consumer module. Create a moon.work file in their shared parent with members = ["./library", "./consumer"], adjusting the directory names to match. In consumer/moon.mod, declare import { "jojochensmart-lab/moonpicross@0.2.0" }. This resolves to the extracted library through the workspace. After 0.2.0 appears on Mooncakes, a consumer outside that workspace can install it with moon add jojochensmart-lab/moonpicross@0.2.0.
 
 Add the package to the caller's moon.pkg:
 
@@ -36,11 +38,11 @@ fn main {
 }
 ~~~
 
-Put the example in an executable package. The full [solve example](examples/solve/main.mbt) also renders the first solution. The [generation example](examples/generate/main.mbt) sets a seed and checks the returned clues again before printing the versioned puzzle. Difficulty reports solver effort and has no human-player calibration.
+Put the example in an executable package. The [solve example](examples/solve/main.mbt) renders the first solution. The [uniqueness example](examples/unique/main.mbt) distinguishes one solution, no solution and multiple solutions. The [generation example](examples/generate/main.mbt) sets a seed and checks the returned clues again before printing the versioned puzzle. Difficulty reports solver effort and has no human-player calibration.
 
 ## Use Studio
 
-Open the online demo, or extract the offline release ZIP and open index.html. Click a cell to cycle unknown, black and white. Right click marks it white. Draw in the editor to derive clues, or request a generated puzzle with a size and seed. Use Solve and verify to inspect the outcome and its trace. Import and export use version 1 JSON.
+Open the online demo, or extract the offline release ZIP and open index.html. Click a cell to cycle unknown, black and white. Right click marks it white. Draw in the editor to derive clues, or request a generated puzzle with a size and seed. Use Solve and verify to inspect the outcome and its trace. The v0.2.0 source build adds undo, redo, keyboard navigation and clue feedback. Its importer validates UTF-8 and rejects malformed puzzle files. Import and export use version 1 JSON.
 
 ~~~json
 {"version":1,"rows":[[1],[3],[5],[3],[1]],"cols":[[1],[3],[5],[3],[1]]}

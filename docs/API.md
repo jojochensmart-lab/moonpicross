@@ -19,4 +19,4 @@ SolveStep carries kind, line, candidate count, affected indices and values and d
 
 Prefer Puzzle::from_grid over the low-level clues(grid, height, width) helper for arbitrary input. The helper expects valid rectangular data.
 
-Install the released core with moon add jojochensmart-lab/moonpicross@0.1.0. The two CLI examples are listed in the [README](../README.md).
+The registry currently provides 0.1.0. For the 0.2.0 candidate, use the extracted archive and workspace setup in the [README](../README.md). That guide lists runnable solve, uniqueness and generation examples.
