@@ -20,3 +20,6 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
 #status{min-height:1.5em;font-weight:600}
 #steps{max-height:18rem;overflow:auto;padding-inline-start:2rem}
 @media(max-width:540px){.cell{width:1.7rem;height:1.7rem}.clue{min-width:1.7rem}}
+.clue.satisfied{color:#216147;font-weight:700}
+.clue.active-line{background:#e0e7ff;outline:1px solid #7e90ca}
+#controls{color:var(--muted);font-size:.875rem}

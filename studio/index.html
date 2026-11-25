@@ -6,10 +6,13 @@
 <main>
   <header><h1>MoonPicross Studio</h1><p>Play, verify and create nonograms offline.</p></header>
   <section class="tools" aria-label="Puzzle tools">
-    <button id="sample">Load example</button><button id="reset">Reset marks</button>
+    <button id="sample">Load example</button><button id="reset">Clear marks</button>
+    <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
+    <button id="check">Check marks</button>
     <button id="solve" class="primary">Solve and verify</button>
     <button id="save">Export JSON</button><label class="file">Import JSON <input id="load" type="file" accept=".json,application/json"></label>
   </section>
+  <p id="controls">Arrow keys move between cells. Space cycles marks. X and right-click toggle a white mark.</p>
   <div id="board-shell"><div id="board" aria-label="Nonogram grid"></div></div>
   <p id="status" role="status"></p>
   <section class="tools" aria-label="Creation tools">

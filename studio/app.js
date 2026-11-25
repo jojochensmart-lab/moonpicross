@@ -3,6 +3,57 @@ const sample = {version:1, rows:[[1],[3],[5],[3],[1]], cols:[[1],[3],[5],[3],[1]
 const $ = id => document.getElementById(id);
 const parse = JSON.parse;
 let puzzle = sample, marks = [], cells = [], editing = false;
+let undo = [], redo = [], rowLabels = [], colLabels = [];
+const historyLimit = 100;
+
+function historyButtons() {
+  $("undo").disabled = undo.length === 0;
+  $("redo").disabled = redo.length === 0;
+}
+function updateMarks(next) {
+  if (next.every((value, index) => value === marks[index])) return;
+  remember(undo);
+  redo = [];
+  marks = next;
+  refresh();
+}
+function remember(stack) {
+  if (stack.length >= historyLimit) stack.shift();
+  stack.push(marks);
+}
+function restore(from, into) {
+  if (!from.length) return;
+  remember(into);
+  marks = from.pop();
+  refresh();
+}
+function refresh() {
+  cells.forEach((_, index) => paint(index));
+  historyButtons();
+  checkComplete();
+}
+function moveFocus(event, index) {
+  const width = puzzle.cols.length;
+  const col = index % width;
+  const movement = {
+    ArrowLeft: col > 0 ? -1 : 0,
+    ArrowRight: col + 1 < width ? 1 : 0,
+    ArrowUp: -width,
+    ArrowDown: width
+  };
+  if (event.key.toLowerCase() === "x") {
+    event.preventDefault();
+    cells[index].dispatchEvent(new MouseEvent("contextmenu", {cancelable:true}));
+  } else if (Object.hasOwn(movement, event.key)) {
+    event.preventDefault();
+    cells[index + movement[event.key]]?.focus();
+  }
+}
+function highlight(index) {
+  const width = puzzle.cols.length;
+  rowLabels.forEach((label, i) => label.classList.toggle("active-line", i === Math.floor(index / width)));
+  colLabels.forEach((label, i) => label.classList.toggle("active-line", i === index % width && index >= 0));
+}
 const run = (fn, ...args) => parse(globalThis[fn](...args));
 function message(text) { $("status").textContent = text; }
 function showAnalysis(report, ms) {
@@ -16,6 +67,7 @@ function label(content) {
   span.className = "clue";
   span.textContent = content;
   $("board").append(span);
+  return span;
 }
 function paint(i) {
   const state = marks[i], cell = cells[i];
@@ -36,14 +88,25 @@ function checkComplete() {
   if (editing) return;
   const w = puzzle.cols.length, h = puzzle.rows.length;
   const bit = (row,col) => Number(marks[row*w+col] === 1);
-  const complete = puzzle.rows.every((row,y) => sameClues(Array.from({length:w},(_,x) => bit(y,x)),row)) &&
-    puzzle.cols.every((col,x) => sameClues(Array.from({length:h},(_,y) => bit(y,x)),col));
-  message(complete ? "Puzzle completed." : "");
+  function matched(labels, hints, line) {
+    let count = 0;
+    hints.forEach((clue, i) => {
+      const ok = sameClues(line(i), clue);
+      labels[i].classList.toggle("satisfied", ok);
+      if (ok) count++;
+    });
+    return count;
+  }
+  const rows = matched(rowLabels, puzzle.rows, y => Array.from({length:w}, (_,x) => bit(y,x)));
+  const cols = matched(colLabels, puzzle.cols, x => Array.from({length:h}, (_,y) => bit(y,x)));
+  message(rows === h && cols === w ? "Puzzle completed." :
+    rows + "/" + h + " rows and " + cols + "/" + w + " columns match.");
 }
 function showPuzzle(next, edit = false) {
   puzzle = next;
   editing = edit;
   $("derive").disabled = !edit;
+  $("check").disabled = edit;
   $("solve").disabled = edit;
   $("save").disabled = edit;
   $("board").replaceChildren();
@@ -51,15 +114,24 @@ function showPuzzle(next, edit = false) {
   showAnalysis(null, 0);
   const w = next.cols.length, h = next.rows.length;
   marks = Array(w*h).fill(-1); cells = [];
+  undo = []; redo = []; rowLabels = []; colLabels = [];
+  historyButtons();
   $("board").style.gridTemplateColumns = "minmax(3rem,max-content) repeat(" + w + ",auto)";
   label("");
-  next.cols.forEach(col => label(edit ? "" : clues(col).replaceAll(" ","\n")));
+  colLabels = next.cols.map(col => label(edit ? "" : clues(col).replaceAll(" ","\n")));
   for (let y=0; y<h; y++) {
-    label(edit ? "" : clues(next.rows[y]));
+    rowLabels.push(label(edit ? "" : clues(next.rows[y])));
     for (let x=0; x<w; x++) {
       const i = y*w+x, cell = document.createElement("button");
       cell.type = "button";
-      const mark = state => { marks[i]=state; paint(i); checkComplete(); };
+      const mark = state => {
+        const next = marks.slice();
+        next[i] = state;
+        updateMarks(next);
+      };
+      cell.onkeydown = event => moveFocus(event, i);
+      cell.onfocus = () => highlight(i);
+      cell.onmouseenter = () => highlight(i);
       cell.onclick = () => mark(marks[i] === -1 ? 1 : marks[i] === 1 ? 0 : -1);
       cell.oncontextmenu = e => { e.preventDefault(); mark(marks[i] === 0 ? -1 : 0); };
       cells.push(cell); $("board").append(cell); paint(i);
@@ -79,7 +151,8 @@ function solve() {
   message(({Unique:"Unique solution",Multiple:"Multiple solutions; showing the first",
     NoSolution:"No solution",Budget:"Budget reached; uniqueness unknown"})[result.status] ?? result.status);
   if (result.first.length && result.status !== "Budget") {
-    marks = result.first; cells.forEach((_,i) => paint(i));
+    updateMarks(result.first);
+    message(result.status === "Unique" ? "Unique solution shown." : "Multiple solutions; showing the first.");
   }
   const list = $("steps");
   list.replaceChildren();
@@ -110,7 +183,18 @@ function sizeValue() {
   return Number.isInteger(n) && n>=5 && n<=15 ? n : 0;
 }
 $("sample").onclick = () => showPuzzle(sample);
-$("reset").onclick = () => showPuzzle(puzzle,editing);
+$("reset").onclick = () => updateMarks(marks.map(() => -1));
+$("undo").onclick = () => restore(undo, redo);
+$("redo").onclick = () => restore(redo, undo);
+$("check").onclick = checkComplete;
+document.addEventListener("keydown", event => {
+  if (!(event.ctrlKey || event.metaKey) || event.target.matches("input, select, textarea")) return;
+  if (event.key.toLowerCase() === "z") {
+    event.preventDefault();
+    if (event.shiftKey) restore(redo, undo);
+    else restore(undo, redo);
+  }
+});
 $("solve").onclick = solve;
 $("edit").onclick = () => {
   const n=sizeValue();
@@ -152,6 +236,11 @@ if (location.search === "?probe") {
     cells[0].click(); assert(marks[0] === -1, "unknown");
     cells[0].dispatchEvent(new MouseEvent("contextmenu", {cancelable:true}));
     assert(marks[0] === 0, "context menu white");
+    $("undo").click(); assert(marks[0] === -1, "undo");
+    $("redo").click(); assert(marks[0] === 0, "redo");
+    cells[0].focus();
+    cells[0].dispatchEvent(new KeyboardEvent("keydown", {key:"ArrowRight"}));
+    assert(document.activeElement === cells[1] && colLabels[1].classList.contains("active-line"), "keyboard and clue highlight");
     $("solve").click();
     assert(marks.filter(value => value === 1).length === 13 && $("steps").children.length > 0, "solve and trace");
 
