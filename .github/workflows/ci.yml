@@ -39,6 +39,10 @@ jobs:
       - run: moon run examples/generate --target wasm-gc
       - run: node scripts/build-studio.mjs
       - run: node scripts/test-studio.mjs
+      - name: Offline Edge integration test
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test-studio-edge.ps1
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
       - name: Windows Native

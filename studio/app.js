@@ -144,16 +144,54 @@ $("save").onclick = () => {
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 showPuzzle(sample);
-if(location.search==="?probe") {
-  const assert = (cond,why) => { if(!cond) throw Error(why); };
-  cells[0].click(); assert(marks[0]===1,"black"); cells[0].click(); assert(marks[0]===0,"white");
-  cells[0].click(); assert(marks[0]===-1,"unknown");
-  $("solve").click(); assert(marks.filter(v=>v===1).length===13 && $("steps").children.length>0,"solve and trace");
-  assert(importPuzzle(exportText()),"file codec");
-  assert(!importPuzzle('{"version":2}'),"invalid file");
-  $("edit").click(); cells[0].click(); $("derive").click(); assert(puzzle.rows[0][0]===1,"derive");
-  $("seed").value="7"; $("generate").click(); assert($("status").textContent.includes("Unique puzzle generated"),"generate");
-  $("size").value=15; $("edit").click(); assert(cells.length===225,"large grid");
-  $("sample").click(); $("reset").click(); assert(marks.every(v=>v===-1),"reset");
-  document.body.dataset.probe="passed";
+if (location.search === "?probe") {
+  async function probe() {
+    const assert = (condition, reason) => { if (!condition) throw Error(reason); };
+    cells[0].click(); assert(marks[0] === 1, "black");
+    cells[0].click(); assert(marks[0] === 0, "white");
+    cells[0].click(); assert(marks[0] === -1, "unknown");
+    cells[0].dispatchEvent(new MouseEvent("contextmenu", {cancelable:true}));
+    assert(marks[0] === 0, "context menu white");
+    $("solve").click();
+    assert(marks.filter(value => value === 1).length === 13 && $("steps").children.length > 0, "solve and trace");
+
+    let download;
+    const click = HTMLAnchorElement.prototype.click;
+    try {
+      HTMLAnchorElement.prototype.click = function() {
+        download = {url:this.href, name:this.download};
+      };
+      $("save").click();
+    } finally {
+      HTMLAnchorElement.prototype.click = click;
+    }
+    assert(download?.name === "moonpicross.json", "export filename");
+    const exported = await (await fetch(download.url)).blob();
+    const input = $("load");
+    const load = async (contents) => {
+      const selection = new DataTransfer();
+      selection.items.add(new File([contents], "puzzle.json", {type:"application/json"}));
+      input.files = selection.files;
+      await input.onchange({target:input});
+    };
+    $("edit").click();
+    await load(exported);
+    assert(!editing && exportText() === await exported.text(), "file round trip");
+    await load(JSON.stringify({...sample, version:2}));
+    assert($("status").textContent.includes("UnsupportedVersion"), "invalid file");
+    $("edit").click(); cells[0].click(); $("derive").click();
+    assert(puzzle.rows[0][0] === 1, "derive");
+    $("seed").value = "7"; $("generate").click();
+    assert($("status").textContent.includes("Unique puzzle generated"), "generate");
+    $("size").value = 15; $("edit").click();
+    const shell = $("board-shell");
+    assert(cells.length === 225 && shell.scrollWidth > shell.clientWidth, "large grid scroll");
+    $("sample").click(); $("reset").click();
+    assert(marks.every(value => value === -1), "reset");
+    document.body.dataset.probe = "passed";
+  }
+  probe().catch(error => {
+    document.body.dataset.probe = error.message;
+    console.error(error);
+  });
 }
