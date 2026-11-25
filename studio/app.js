@@ -137,7 +137,8 @@ function showPuzzle(next, edit = false) {
       cells.push(cell); $("board").append(cell); paint(i);
     }
   }
-  message(edit ? "Draw the black cells, then apply clues. Unmarked cells become white." : "Ready.");
+  if (edit) message("Draw the black cells, then apply clues. Unmarked cells become white.");
+  else checkComplete();
 }
 function analyze(source) {
   const t = performance.now();
@@ -278,6 +279,8 @@ if (location.search === "?probe") {
     assert($("status").textContent.includes("UnsupportedVersion"), "invalid file");
     await load(new Uint8Array([0xC3, 0x28]));
     assert($("status").textContent.includes("UTF-8"), "malformed UTF-8");
+    assert(importPuzzle(JSON.stringify({version:1, rows:[[]], cols:[[]]})), "empty clue puzzle");
+    assert(document.querySelectorAll(".clue.satisfied").length === 2, "initial clue status");
     $("edit").click(); cells[0].click(); $("derive").click();
     assert(puzzle.rows[0][0] === 1, "derive");
     $("seed").value = "7"; $("generate").click();
