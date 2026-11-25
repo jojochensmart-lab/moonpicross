@@ -34,6 +34,8 @@ pub(all) struct Metrics {
 pub(all) struct SolveResult {
   status : Status
   first : Array[Int32]?
+  steps : Array[SolveStep]
+  trace_truncated : Bool
   metrics : Metrics
 }
 
@@ -108,7 +110,7 @@ pub fn line_patterns(
   clue : Array[Int32],
   cap : Int32,
 ) -> Result[Array[Int32], Status] {
-  Ok(patterns(n, clue, cap)) catch {
+  Ok(patterns(n, clue, cap.min(300000))) catch {
     InvalidInput => Err(Invalid)
     Exhausted => Err(Budget)
   }
@@ -151,6 +153,9 @@ priv struct Search {
   domains : Array[Array[Int32]]
   limits : Limits
   metrics : Metrics
+  trace_limit : Int32
+  steps : Array[SolveStep]
+  mut trace_truncated : Bool
   mut solutions : Int32
   mut first : Array[Int32]?
 }
@@ -160,6 +165,7 @@ fn Search::sweep(
   self : Search,
   grid : Array[Int32],
   line : Int32,
+  depth : Int32,
 ) -> Int32 raise Stop {
   let is_row = line < self.h
   let (n, offset, step) = if is_row {
@@ -180,22 +186,25 @@ fn Search::sweep(
   }
   let mut all = (1 << n) - 1
   let mut any = 0
-  let mut found = false
+  let mut found = 0
   for mask in self.domains[line] {
-    if self.metrics.scans >= self.limits.scans {
+    if self.metrics.scans >= self.limits.scans.min(5000000) {
       raise Exhausted
     }
     self.metrics.scans += 1
     if (mask & black) == black && (mask & white) == 0 {
       all = all & mask
       any = any | mask
-      found = true
+      found += 1
     }
   }
-  if !found {
+  if found == 0 {
+    self.record("contradiction", line, 0, [], [], depth)
     return -1
   }
   let mut forced = 0
+  let indices = []
+  let values = []
   for i in 0..<n {
     let at = offset + i * step
     let bit = 1 << i
@@ -203,11 +212,33 @@ fn Search::sweep(
       if (all & bit) != 0 {
         grid[at] = 1
         forced += 1
+        if self.trace_limit > 0 {
+          indices.push(at)
+          values.push(grid[at])
+        }
       } else if (any & bit) == 0 {
         grid[at] = 0
         forced += 1
+        if self.trace_limit > 0 {
+          indices.push(at)
+          values.push(grid[at])
+        }
       }
     }
+  }
+  if forced > 0 {
+    self.record(
+      if is_row {
+        "row"
+      } else {
+        "column"
+      },
+      line,
+      found,
+      indices,
+      values,
+      depth,
+    )
   }
   forced
 }
@@ -218,7 +249,7 @@ fn Search::visit(
   grid : Array[Int32],
   depth : Int32,
 ) -> Unit raise Stop {
-  if self.metrics.nodes >= self.limits.nodes || depth > 256 {
+  if self.metrics.nodes >= self.limits.nodes.min(5000) || depth > 256 {
     raise Exhausted
   }
   self.metrics.nodes += 1
@@ -226,7 +257,7 @@ fn Search::visit(
     let mut forced = 0
     self.metrics.rounds += 1
     for line in 0..<(self.h + self.w) {
-      let added = self.sweep(grid, line)
+      let added = self.sweep(grid, line, depth)
       if added < 0 {
         self.metrics.forced_by_round.push(forced)
         return
@@ -255,11 +286,13 @@ fn Search::visit(
   for v in 0..<2 {
     let branch = grid.copy()
     branch[at] = v
+    self.record("branch", -1, 2, [at], [v], depth)
     let before = self.solutions
     self.visit(branch, depth + 1)
     if self.solutions == before {
       self.metrics.backtracks += 1
     }
+    self.record("backtrack", -1, 0, [at], [v], depth)
     if self.solutions >= 2 {
       return
     }
@@ -271,6 +304,7 @@ pub fn solve(
   rows : Array[Array[Int32]],
   cols : Array[Array[Int32]],
   limits : Limits,
+  trace~ : Int32 = 0,
 ) -> SolveResult {
   let h = rows.length()
   let w = cols.length()
@@ -289,11 +323,20 @@ pub fn solve(
     domains: [],
     limits,
     metrics,
+    trace_limit: trace.max(0).min(2000),
+    steps: [],
+    trace_truncated: false,
     solutions: 0,
     first: None,
   }
   let status = try {
-    if h < 1 || w < 1 || h > 30 || w > 30 {
+    if h < 1 ||
+      w < 1 ||
+      h > 30 ||
+      w > 30 ||
+      limits.nodes < 0 ||
+      limits.scans < 0 ||
+      limits.candidates < 0 {
       raise InvalidInput
     }
     for line in 0..<(h + w) {
@@ -302,7 +345,11 @@ pub fn solve(
       } else {
         (h, cols[line - h])
       }
-      let domain = patterns(n, clue, limits.candidates - metrics.patterns)
+      let domain = patterns(
+        n,
+        clue,
+        limits.candidates.min(300000) - metrics.patterns,
+      )
       metrics.patterns += domain.length()
       if domain.length() > metrics.largest {
         metrics.largest = domain.length()
@@ -319,7 +366,14 @@ pub fn solve(
     InvalidInput => Invalid
     Exhausted => Budget
   }
-  { status, first: search.first, metrics, }
+  search.record("finish", -1, search.solutions, [], [], 0)
+  {
+    status,
+    first: search.first,
+    metrics,
+    steps: search.steps,
+    trace_truncated: search.trace_truncated,
+  }
 }
 
 ///|
@@ -345,7 +399,16 @@ pub fn generate(
   density : Int32,
   max_attempts : Int32,
   limits : Limits,
+  target~ : String? = None,
+  observe~ : (SolveResult) -> Unit = _ => (),
 ) -> Result[Generated, GenerationError] {
+  if target is Some(level) &&
+    level != "Easy" &&
+    level != "Normal" &&
+    level != "Hard" &&
+    level != "Expert" {
+    return Err(InvalidOptions)
+  }
   if n < 1 ||
     n > 30 ||
     density < 0 ||
@@ -368,11 +431,33 @@ pub fn generate(
     })
     let (rows, cols) = clues(grid, n, n)
     let result = solve(rows, cols, limits)
+    observe(result)
     match result.status {
-      Unique => return Ok({ rows, cols, grid, attempts: attempt, result, })
-      NoSolution | Invalid => return Err(Invariant)
+      Unique if target is None || target == Some(difficulty(result).level) =>
+        return Ok({ rows, cols, grid, attempts: attempt, result, })
+      Invalid => return Err(Invariant)
       _ => ()
     }
   }
   Err(AttemptLimit)
+}
+
+///|
+fn Search::record(
+  self : Search,
+  kind : String,
+  line : Int32,
+  candidates : Int32,
+  indices : Array[Int32],
+  values : Array[Int32],
+  depth : Int32,
+) -> Unit {
+  if self.trace_limit == 0 {
+    return
+  }
+  if self.steps.length() >= self.trace_limit {
+    self.trace_truncated = true
+    return
+  }
+  self.steps.push({ kind, line, candidates, indices, values, depth, })
 }

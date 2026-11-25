@@ -34,4 +34,5 @@ fn main {
       }
     }
   }
+  run_generation_survey()
 }
