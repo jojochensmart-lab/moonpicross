@@ -1,11 +1,13 @@
 """Smoke-test the local Mooncakes ZIP as a dependency; performs no publish."""
+import re
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 from zipfile import ZipFile
 root = Path(__file__).resolve().parents[1]
-archive = root / "_build/publish/jojochensmart-lab-moonpicross-0.1.0.zip"
+version = re.search(r'(?m)^version = "([^"]+)"', (root / "moon.mod").read_text()).group(1)
+archive = root / f"_build/publish/jojochensmart-lab-moonpicross-{version}.zip"
 workspace = Path(tempfile.mkdtemp(prefix="consumer-", dir=root / "_build"))
 lib = workspace / "library"
 consumer = workspace / "consumer"
@@ -13,10 +15,11 @@ consumer.mkdir()
 with ZipFile(archive) as package:
     assert package.testzip() is None
     assert "core/solver.mbt" in package.namelist()
+    assert "shenbaoshu.md" not in package.namelist()
     assert not any(p.startswith(("studio/", "webapi/", "scripts/")) or p.endswith(".log") for p in package.namelist())
     package.extractall(lib)
 (workspace / "moon.work").write_text('members = ["./library", "./consumer"]\n', encoding="utf-8")
-(consumer / "moon.mod").write_text('name = "local/picross-consumer"\nimport { "jojochensmart-lab/moonpicross@0.1.0" }\n', encoding="utf-8")
+(consumer / "moon.mod").write_text(f'name = "local/picross-consumer"\nimport {{ "jojochensmart-lab/moonpicross@{version}" }}\n', encoding="utf-8")
 shutil.copy(root / "examples/solve/moon.pkg", consumer)
 shutil.copy(root / "examples/solve/main.mbt", consumer)
 for args in (("check", "--target", "wasm-gc"), ("run", "consumer", "--target", "wasm-gc")):

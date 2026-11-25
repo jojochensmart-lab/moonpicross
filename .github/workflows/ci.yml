@@ -38,12 +38,17 @@ jobs:
       - run: moon test --target js
       - run: moon run examples/solve --target wasm-gc
       - run: moon run examples/generate --target wasm-gc
+      - run: moon run examples/unique --target wasm-gc
+      - run: moon run demo --target wasm-gc --release
       - run: node scripts/build-studio.mjs
       - run: node scripts/test-studio.mjs
       - name: Offline Edge integration test
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/test-studio-edge.ps1
+      - name: Edge file selection and disk download
+        if: runner.os == 'Windows'
+        run: node scripts/test-studio-files.mjs
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
       - name: Windows Native
