@@ -147,11 +147,20 @@ pub fn clues(
 }
 
 ///|
+priv struct LineState {
+  black : Int32
+  white : Int32
+  survivors : Int32
+}
+
+///|
 priv struct Search {
   h : Int32
   w : Int32
   domains : Array[Array[Int32]]
   limits : Limits
+  depth_limit : Int32
+  line_state : Array[LineState?]
   metrics : Metrics
   trace_limit : Int32
   steps : Array[SolveStep]
@@ -183,6 +192,12 @@ fn Search::sweep(
     if cell == 0 {
       white = white | (1 << i)
     }
+  }
+  // A mask key captures all inputs to this line, even across DFS siblings.
+  if self.line_state[line] is Some(previous) &&
+    previous.black == black &&
+    previous.white == white {
+    return 0
   }
   let mut all = (1 << n) - 1
   let mut any = 0
@@ -226,6 +241,12 @@ fn Search::sweep(
       }
     }
   }
+  // Assigning cells common to all survivors leaves that same domain intact.
+  self.line_state[line] = Some({
+    black: all,
+    white: ((1 << n) - 1) ^ any,
+    survivors: found,
+  })
   if forced > 0 {
     self.record(
       if is_row {
@@ -249,7 +270,8 @@ fn Search::visit(
   grid : Array[Int32],
   depth : Int32,
 ) -> Unit raise Stop {
-  if self.metrics.nodes >= self.limits.nodes.min(5000) || depth > 256 {
+  if self.metrics.nodes >= self.limits.nodes.min(5000) ||
+    depth > self.depth_limit {
     raise Exhausted
   }
   self.metrics.nodes += 1
@@ -270,10 +292,20 @@ fn Search::visit(
     }
   }
   let mut at = -1
+  let mut best_small = 2147483647
+  let mut best_large = 2147483647
   for i, v in grid {
     if v < 0 {
-      at = i
-      break
+      let row = self.line_state[i / self.w].unwrap().survivors
+      let col = self.line_state[self.h + i % self.w].unwrap().survivors
+      // Prefer the smallest incident domain, breaking ties with the other.
+      let small = row.min(col)
+      let large = row.max(col)
+      if small < best_small || (small == best_small && large < best_large) {
+        best_small = small
+        best_large = large
+        at = i
+      }
     }
   }
   if at < 0 {
@@ -306,6 +338,18 @@ pub fn solve(
   limits : Limits,
   trace~ : Int32 = 0,
 ) -> SolveResult {
+  solve_bounded(rows, cols, limits, trace~, max_depth=256)
+}
+
+///|
+/// Solve with an optional lower depth ceiling. The root has depth zero.
+pub fn solve_bounded(
+  rows : Array[Array[Int32]],
+  cols : Array[Array[Int32]],
+  limits : Limits,
+  trace~ : Int32 = 0,
+  max_depth~ : Int32 = 256,
+) -> SolveResult {
   let h = rows.length()
   let w = cols.length()
   let metrics = {
@@ -322,6 +366,8 @@ pub fn solve(
     w,
     domains: [],
     limits,
+    depth_limit: max_depth.min(256),
+    line_state: [],
     metrics,
     trace_limit: trace.max(0).min(2000),
     steps: [],
@@ -334,6 +380,7 @@ pub fn solve(
       w < 1 ||
       h > 30 ||
       w > 30 ||
+      max_depth < 0 ||
       limits.nodes < 0 ||
       limits.scans < 0 ||
       limits.candidates < 0 {
@@ -355,6 +402,7 @@ pub fn solve(
         metrics.largest = domain.length()
       }
       search.domains.push(domain)
+      search.line_state.push(None)
     }
     search.visit(Array::make(h * w, -1), 0)
     match search.solutions {
@@ -419,16 +467,40 @@ pub fn generate(
   }
   let mut state = if seed == 0U { 1U } else { seed }
   for attempt in 1..<=max_attempts {
-    let grid = Array::makei(n * n, _ => {
+    let grid = Array::make(n * n, 0)
+    let structured = n >= 15 && attempt >= 9 && attempt % 2 == 1
+    let vertical = attempt % 4 == 1
+    for i in 0..<(n * n) {
       state = state ^ (state << 13)
       state = state ^ (state >> 17)
       state = state ^ (state << 5)
-      if state % 100U < density.reinterpret_as_uint() {
-        1
-      } else {
-        0
+      let mut threshold = density
+      if structured && density > 0 && density < 100 {
+        let neighbor = if vertical {
+          if i >= n {
+            i - n
+          } else {
+            -1
+          }
+        } else if i % n > 0 {
+          i - 1
+        } else {
+          -1
+        }
+        if neighbor >= 0 {
+          // Give runs a chance to form while keeping the configured density
+          // as the expected marginal probability along the line.
+          threshold = if grid[neighbor] == 1 {
+            density + (100 - density) / 2
+          } else {
+            (density + 1) / 2
+          }
+        }
       }
-    })
+      if state % 100U < threshold.reinterpret_as_uint() {
+        grid[i] = 1
+      }
+    }
     let (rows, cols) = clues(grid, n, n)
     let result = solve(rows, cols, limits)
     observe(result)
