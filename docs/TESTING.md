@@ -22,3 +22,5 @@ The Python oracle enumerates binary boards and groups them by their clues. The M
 The Node bridge test builds on structured sample inputs. A separate headless Edge test loads the local page at 420×850 via the probe query string. It tests marks, reset, trace, editing, the import handler with browser File objects, exported Blob content, generation and narrow-screen 15×15 scrolling. Native file-picker and download interaction still need a manual browser pass. Browser Wasm is outside this build path.
 
 Native validation commands are moon build --target native and moon test --target native. The Windows runner uses the Visual Studio C++ developer environment. Results and outstanding checks are listed in [the release report](PROJECT_RELEASE_READINESS_REPORT.md).
+
+The hosted Studio uses the same probe: pwsh -NoProfile -File scripts/test-studio-edge.ps1 -Url https://jojochensmart-lab.github.io/moonpicross/. The [acceptance report](FINAL_RELEASE_ACCEPTANCE_REPORT.md) records the separate fresh-project Mooncakes install and the successful Windows Native runner.

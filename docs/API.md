@@ -18,3 +18,5 @@ A Unique result means search finished after finding exactly one solution. Multip
 SolveStep carries kind, line, candidate count, affected indices and values and depth. The trace is a bounded sequence of search events. It can include speculative marks followed by backtracks. The final status is available independently of trace truncation.
 
 Prefer Puzzle::from_grid over the low-level clues(grid, height, width) helper for arbitrary input. The helper expects valid rectangular data.
+
+Install the released core with moon add jojochensmart-lab/moonpicross@0.1.0. The two CLI examples are listed in the [README](../README.md).

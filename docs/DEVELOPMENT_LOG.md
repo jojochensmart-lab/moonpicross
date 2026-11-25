@@ -12,3 +12,7 @@
 | G. CI | 25181a2 added local workflow configuration. 863d30b captured the exported API and added the packaged consumer check to CI. Hosted runs are pending. |
 | H. Packaging | d74c45f exercised a downstream project from the local ZIP. Registry installation, owner and publish permissions remain pending. |
 | I. Review | Recorded the source audit, open-source compliance, eligibility comparison and verifiable material for the participant. |
+
+## Formal release
+
+Published v0.1.0 with the original development history, Windows/Linux CI, Pages, offline archive and a verified independent install from Mooncakes. [Full evidence](FINAL_RELEASE_ACCEPTANCE_REPORT.md)

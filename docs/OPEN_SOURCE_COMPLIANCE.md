@@ -13,3 +13,5 @@ The core uses the MoonBit standard library. The Studio uses platform HTML, CSS a
 | moonpeg | MIT. Related example of budget and certificate APIs for a different puzzle; no files incorporated. [Source](https://github.com/kekeshuo/moonpeg) |
 
 Apache-2.0 license text ships in the archive. Before accepting contributions or adding external assets, record provenance and carry forward any notices required by their licenses.
+
+GitHub Pages uses the official configure-pages, upload-pages-artifact and deploy-pages actions. The public project license and the registry SPDX identifier are Apache-2.0. [Pages workflow](../.github/workflows/pages.yml) · [Published module](https://mooncakes.io/docs/jojochensmart-lab/moonpicross)

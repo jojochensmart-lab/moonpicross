@@ -1,6 +1,8 @@
 # MoonPicross Studio 第二阶段发布就绪报告
 
-验收日期为 2026 年 11 月 25 日（北京时间）。本地项目位于 D:/moonpicross_audit，模块为 jojochensmart-lab/moonpicross，版本 0.1.0。
+本文件为发布前历史记录。最新结果见[正式发布验收](FINAL_RELEASE_ACCEPTANCE_REPORT.md)。
+
+验收日期为 2026 年 11 月 25 日（北京时间）。模块为 jojochensmart-lab/moonpicross，版本 0.1.0。
 
 **结论 B：核心功能完成，但还有少量发布阻塞。** JS 和 Wasm GC、离线 Edge、独立 Oracle 和本地包消费者均有实测证据。Windows Native、本批次精确日期、GitHub 公开验收及 Mooncakes 登记与安装仍待完成。首版范围是 5×5 至 15×15 黑白数织。
 
@@ -48,7 +50,7 @@ core/model.mbt 定义三态格、谜题、输入错误及有界轨迹。core/sol
 
 | 命令 | 实际结果 |
 |---|---|
-| python tests/oracle.py | 生成独立用例，通过。现场使用 D:/anaconda/python.exe，WindowsApps 的 python 是占位程序。 |
+| python tests/oracle.py | 生成独立用例，通过。现场使用可用的 Python 3 解释器。 |
 | moon fmt --check | 通过。复验修正了重新生成夹具时的格式漂移，生成后校验无 diff。 |
 | moon check --target wasm-gc | 通过，0 错误，现有工具链报 26 条弃用等警告。 |
 | moon build --target wasm-gc | 通过。 |

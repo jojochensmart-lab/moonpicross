@@ -1,10 +1,13 @@
-# Release checklist
+# Release and verification
 
-1. Confirm the competition charter and the dates that apply to the intended batch.
-2. Reproduce JS and Wasm GC tests. Run Native build and tests in a usable compiler environment and record the result.
-3. Build and exercise the archive with moon package --list and python tests/package_smoke.py. This is a local downstream dependency using moon.work. The registry install remains a separate test.
-4. Confirm module ownership and availability through the intended Mooncakes account. Add the real repository URL to the module manifest after the repository is approved and exists.
-5. After separate permission to write remotely, publish the approved history to the approved repository and verify GitHub Actions on both runner platforms. Check whether the target contest requires at least ten commits visible on GitHub.
-6. After explicit approval to publish, publish the reviewed module, install it from the registry in a new project, import the core and run a basic solve and example. Verify the release source and registry artifacts before announcing.
+- Core version 0.1.0 is on [Mooncakes](https://mooncakes.io/docs/jojochensmart-lab/moonpicross).
+- Browser Studio is public on [GitHub Pages](https://jojochensmart-lab.github.io/moonpicross/).
+- The offline ZIP is attached to [v0.1.0](https://github.com/jojochensmart-lab/moonpicross/releases/tag/v0.1.0).
+- Actual platform, browser and downstream installation results are recorded in the [acceptance report](FINAL_RELEASE_ACCEPTANCE_REPORT.md).
 
-The current version is 0.1.0 and the license is Apache-2.0. The module archive excludes the browser application and bridge.
+## Releasing a new version
+
+1. Agree on the SemVer change. Run the source tests, browser probe and package consumer checks. Review the archived LICENSE and README before publication.
+2. Push the reviewed commit, confirm Linux and Windows CI, and run the Pages probe against the deployed site.
+3. Confirm the new release tag and registry version are unused. Check the authorized account and module namespace. Validate the archive through moon publish --dry-run where supported. Publish only the intended version.
+4. Verify the public registry page and add the exact version in a new project with no local module override. Run check, test and both examples. Confirm that the public Release tag points to the intended code.

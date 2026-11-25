@@ -9,3 +9,7 @@ Core is pure MoonBit. The browser bridge translates between structured JSON and 
 5. Generation samples from a seeded state, derives clues and accepts only a completed uniqueness proof. An optional difficulty filter also applies before acceptance.
 
 The fixed first-unknown strategy makes search and trace reproducible. Different heuristics may help large boards. The present difficulty policy classifies unique puzzles by visited nodes: Easy at 1, Normal at 2–20, Hard at 21–100 and Expert above 100. Propagation, candidates, guesses and backtracks are reported alongside the label. The thresholds are solver-specific and require empirical calibration for human difficulty.
+
+## Distribution
+
+Mooncakes ships the core and MoonBit examples. GitHub Pages serves the browser bundle, and the Release ZIP contains the same app and its compiled engine for offline use.
