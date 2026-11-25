@@ -4,6 +4,8 @@ MoonPicross is a MoonBit library for solving, generating and verifying black-and
 
 [Online Studio](https://jojochensmart-lab.github.io/moonpicross/) · [Offline download](https://github.com/jojochensmart-lab/moonpicross/releases/tag/v0.1.0) · [GitHub](https://github.com/jojochensmart-lab/moonpicross) · [Mooncakes](https://mooncakes.io/docs/jojochensmart-lab/moonpicross)
 
+The development branch targets v0.2.0. The public installation and demo links below point to the released v0.1.0. See the [candidate report](docs/V020_ACCEPTANCE_REPORT.md).
+
 ## Install the core
 
 In an existing MoonBit module, add the versioned dependency:
@@ -61,6 +63,7 @@ moon check --target wasm-gc
 moon test --target wasm-gc
 moon test --target js
 moon run examples/solve --target wasm-gc
+moon run examples/unique --target wasm-gc
 moon run examples/generate --target wasm-gc
 node scripts/build-studio.mjs
 node scripts/test-studio.mjs
