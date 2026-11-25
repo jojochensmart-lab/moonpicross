@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit on Linux
@@ -29,7 +30,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: moon version
+      - name: Record candidate revision and runtime versions
+        run: |
+          git rev-parse HEAD
+          moon version
+          python --version
+          node --version
       - run: python tests/oracle.py
       - run: moon fmt --check
       - run: moon check --target wasm-gc
@@ -40,6 +46,12 @@ jobs:
       - run: moon run examples/generate --target wasm-gc
       - run: moon run examples/unique --target wasm-gc
       - run: moon run demo --target wasm-gc --release
+      - name: Independently certify generation witnesses
+        shell: pwsh
+        run: |
+          moon run demo --target wasm-gc --release -- stability > _build/stability.csv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -X utf8 tests/stability_audit.py _build/stability.csv
       - run: node scripts/build-studio.mjs
       - run: node scripts/test-studio.mjs
       - name: Offline Edge integration test
