@@ -1,0 +1,69 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "jojochensmart-lab/moonpicross/core"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn clue_for(Array[Int32]) -> Array[Int32]
+
+pub fn clues(Array[Int32], Int32, Int32) -> (Array[Array[Int32]], Array[Array[Int32]])
+
+pub fn generate(Int32, UInt32, Int32, Int32, Limits) -> Result[Generated, GenerationError]
+
+pub fn line_patterns(Int32, Array[Int32], Int32) -> Result[Array[Int32], Status]
+
+pub fn solve(Array[Array[Int32]], Array[Array[Int32]], Limits) -> SolveResult
+
+// Errors
+
+// Types and methods
+pub(all) struct Generated {
+  rows : Array[Array[Int32]]
+  cols : Array[Array[Int32]]
+  grid : Array[Int32]
+  attempts : Int32
+  result : SolveResult
+}
+
+pub(all) enum GenerationError {
+  InvalidOptions
+  AttemptLimit
+  Invariant
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Limits {
+  candidates : Int32
+  nodes : Int32
+  scans : Int32
+}
+pub fn Limits::default() -> Self
+
+pub(all) struct Metrics {
+  mut patterns : Int32
+  mut largest : Int32
+  mut rounds : Int32
+  mut nodes : Int32
+  mut backtracks : Int32
+  mut scans : Int32
+  forced_by_round : Array[Int32]
+}
+
+pub(all) struct SolveResult {
+  status : Status
+  first : Array[Int32]?
+  metrics : Metrics
+}
+
+pub(all) enum Status {
+  NoSolution
+  Unique
+  Multiple
+  Budget
+  Invalid
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

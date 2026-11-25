@@ -1,0 +1,6 @@
+/_build/
+/*.log
+/research.json
+/studio/engine.js
+/studio/*.png
+/bench-results.csv

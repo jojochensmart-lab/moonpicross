@@ -1,0 +1,11 @@
+import {
+  "jojochensmart-lab/moonpicross/core",
+}
+
+supported_targets = "js"
+
+pkgtype(kind: "foreign_library")
+
+options(
+  link: { "js": { "format": "iife", "exports": [ "solve_demo" ] } },
+)
