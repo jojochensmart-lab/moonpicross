@@ -3,6 +3,7 @@ from collections import Counter
 from itertools import product
 from random import Random
 from pathlib import Path
+import subprocess
 
 def clue(line):
     return tuple(len(run) for run in "".join(map(str, line)).split("0") if run)
@@ -83,3 +84,4 @@ lines += ["}"]
 print("candidate catalogs:", line_groups, "line masks:", patterns)
 Path("core/oracle_test.mbt").write_text("\n".join(lines)+"\n", encoding="utf-8")
 print("3x3",dict(Counter(codes)),"4x4 / 5x5",stats)
+subprocess.run(["moon", "fmt", "core"], check=True)

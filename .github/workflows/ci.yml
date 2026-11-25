@@ -31,6 +31,7 @@ jobs:
           node-version: '22'
       - run: moon version
       - run: python tests/oracle.py
+      - run: moon fmt --check
       - run: moon check --target wasm-gc
       - run: moon build --target wasm-gc
       - run: moon test --target wasm-gc
