@@ -489,7 +489,7 @@ pub fn generate(
         }
         if neighbor >= 0 {
           // Give runs a chance to form while keeping the configured density
-          // as the expected marginal probability along the line.
+          // close to the expected marginal probability along the line.
           threshold = if grid[neighbor] == 1 {
             density + (100 - density) / 2
           } else {

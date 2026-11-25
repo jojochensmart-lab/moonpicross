@@ -1,0 +1,6 @@
+import {
+  "jojochensmart-lab/moonpicross/core",
+  "moonbitlang/core/debug",
+}
+
+pkgtype(kind: "executable")
