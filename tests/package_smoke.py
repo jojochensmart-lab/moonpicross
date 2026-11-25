@@ -28,7 +28,6 @@ source_dirs = {"core", "demo", "examples", "docs", "tests"}
 sensitive = [
     re.compile(r"(?i)(?<![\w/])[A-Z]:[/\\]|/(?:Users|home|tmp)/[\w.-]+/"),
     re.compile(r"github_pat_[A-Za-z0-9_]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-    re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)"),
     re.compile(r'(?i)(?:api[_-]?key|token|password)\s*[:=]\s*["\x27][^"\x27\r\n]{12,}'),
 ]
 with ZipFile(archive) as package:
@@ -45,6 +44,9 @@ with ZipFile(archive) as package:
         content = package.read(entry).decode("utf-8-sig")
         if str(name) != "tests/package_smoke.py":
             assert not any(pattern.search(content) for pattern in sensitive), f"Sensitive pattern in {name}"
+            # Commit IDs and package digests may contain a run of 11 digits.
+            without_hashes = re.sub(r"\b(?:[a-f0-9]{40}|[a-f0-9]{64})\b", "", content, flags=re.I)
+            assert not re.search(r"(?<!\d)1[3-9]\d{9}(?!\d)", without_hashes), f"Phone-like value in {name}"
     for name in ("README.md", "LICENSE", "moon.mod"):
         expected = (root / name).read_bytes()
         actual = package.read(name)
