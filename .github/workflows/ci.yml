@@ -1,0 +1,49 @@
+name: MoonPicross CI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MoonBit on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - name: Install MoonBit on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          (Join-Path $env:USERPROFILE '.moon/bin') >> $env:GITHUB_PATH
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: moon version
+      - run: python tests/oracle.py
+      - run: moon check --target wasm-gc
+      - run: moon build --target wasm-gc
+      - run: moon test --target wasm-gc
+      - run: moon test --target js
+      - run: moon run examples/solve --target wasm-gc
+      - run: moon run examples/generate --target wasm-gc
+      - run: node scripts/build-studio.mjs
+      - run: node scripts/test-studio.mjs
+      - name: Windows Native
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          moon build --target native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          moon test --target native
+      - run: moon package --list

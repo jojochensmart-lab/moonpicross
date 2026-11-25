@@ -1,0 +1,5 @@
+import {
+  "jojochensmart-lab/moonpicross/core",
+}
+
+pkgtype(kind: "executable")
