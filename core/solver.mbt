@@ -386,6 +386,11 @@ pub fn solve_bounded(
       limits.candidates < 0 {
       raise InvalidInput
     }
+    // Validate all clues before bounded work so malformed input cannot become Budget.
+    if rows.any(row => !valid_line(w, row)) ||
+      cols.any(col => !valid_line(h, col)) {
+      raise InvalidInput
+    }
     for line in 0..<(h + w) {
       let (n, clue) = if line < h {
         (w, rows[line])
@@ -462,7 +467,10 @@ pub fn generate(
     density < 0 ||
     density > 100 ||
     max_attempts < 1 ||
-    max_attempts > 1000 {
+    max_attempts > 1000 ||
+    limits.candidates < 0 ||
+    limits.nodes < 0 ||
+    limits.scans < 0 {
     return Err(InvalidOptions)
   }
   let mut state = if seed == 0U { 1U } else { seed }

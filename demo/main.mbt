@@ -1,5 +1,9 @@
 ///|
 fn main {
+  if @core_env.args().contains("stability") {
+    run_stability()
+    return
+  }
   println("solve,size,case,status,nodes,backtracks,scans,us")
   for n in [5, 10, 15, 20] {
     for seed in 0..<60 {
