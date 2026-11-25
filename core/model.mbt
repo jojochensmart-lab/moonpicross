@@ -96,7 +96,25 @@ pub fn Puzzle::from_grid(grid : Grid) -> Result[Puzzle, PuzzleError] {
 
 ///|
 pub fn Puzzle::from_json(source : String) -> Result[Puzzle, PuzzleError] {
-  let value = @json.parse(source) catch { _ => return Err(InvalidFormat) }
+  if source.length() > 32768 {
+    return Err(InvalidFormat)
+  }
+  let value = @json.parse(
+    source,
+    max_nesting_depth=8,
+    reject_duplicate_keys=true,
+  ) catch {
+    _ => return Err(InvalidFormat)
+  }
+  let accepted = match
+    (value.value("version"), value.value("rows"), value.value("cols")) {
+    (Some(version), Some(rows), Some(cols)) =>
+      json_integer(version) && json_lines(rows) && json_lines(cols)
+    _ => false
+  }
+  if !accepted {
+    return Err(InvalidFormat)
+  }
   let puzzle : Puzzle = @json.from_json(value) catch {
     _ => return Err(InvalidFormat)
   }
@@ -130,3 +148,26 @@ pub(all) struct SolveStep {
 
 ///|
 pub type SolverStats = Metrics
+
+///|
+fn json_integer(value : Json) -> Bool {
+  match value.as_number() {
+    Some(n) =>
+      n >= -2147483648.0 && n <= 2147483647.0 && n == n.to_int().to_double()
+    None => false
+  }
+}
+
+///|
+fn json_lines(value : Json) -> Bool {
+  guard value.as_array() is Some(lines) else { return false }
+  for line in lines {
+    guard line.as_array() is Some(clues) else { return false }
+    for clue in clues {
+      if !json_integer(clue) {
+        return false
+      }
+    }
+  }
+  true
+}
