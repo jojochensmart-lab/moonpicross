@@ -9,7 +9,7 @@ fn main {
     for y in 0..<5 {
       println(
         grid[y * 5:y * 5 + 5]
-        .to_array()
+        .to_owned()
         .map(v => if v == 1 { "#" } else { "." })
         .join(""),
       )

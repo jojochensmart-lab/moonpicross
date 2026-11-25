@@ -15,7 +15,7 @@ fn run_generation_survey() -> Unit {
       let start = @bench.monotonic_clock_start()
       let result = @core.generate(
         n,
-        seed.to_uint(),
+        seed.reinterpret_as_uint(),
         45,
         24,
         @core.Limits::default(),

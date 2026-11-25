@@ -1,6 +1,6 @@
 ///|
 fn error(message : String) -> String {
-  Json::object({ "error": message.to_json() }).stringify()
+  Json::object({ "error": Json(message) }).stringify()
 }
 
 ///|
@@ -14,14 +14,14 @@ pub fn solve_puzzle(source : String) -> String {
       let result = puzzle.solve(@core.Limits::default(), trace=1000).unwrap()
       Json::object({
         "puzzle": puzzle.to_json(),
-        "status": @debug.to_string(result.status).to_json(),
+        "status": Json(@debug.to_string(result.status)),
         "first": match result.first {
-          Some(grid) => grid.to_json()
-          None => ([] : Array[Int32]).to_json()
+          Some(grid) => Json(grid)
+          None => Json(([] : Array[Int32]))
         },
         "difficulty": @core.difficulty(result).to_json(),
-        "steps": result.steps.to_json(),
-        "trace_truncated": result.trace_truncated.to_json(),
+        "steps": Json(result.steps),
+        "trace_truncated": Json(result.trace_truncated),
       }).stringify()
     }
   }
@@ -65,7 +65,7 @@ pub fn generate_puzzle(size : Int32, seed : UInt32, target : String) -> String {
       let puzzle : @core.Puzzle = { version: 1, rows: g.rows, cols: g.cols, }
       Json::object({
         "puzzle": puzzle.to_json(),
-        "attempts": g.attempts.to_json(),
+        "attempts": Json(g.attempts),
         "difficulty": @core.difficulty(g.result).to_json(),
       }).stringify()
     }

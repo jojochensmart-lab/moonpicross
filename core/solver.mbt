@@ -423,7 +423,7 @@ pub fn generate(
       state = state ^ (state << 13)
       state = state ^ (state >> 17)
       state = state ^ (state << 5)
-      if state % 100U < density.to_uint() {
+      if state % 100U < density.reinterpret_as_uint() {
         1
       } else {
         0
@@ -461,3 +461,15 @@ fn Search::record(
   }
   self.steps.push({ kind, line, candidates, indices, values, depth, })
 }
+
+///|
+pub extend Status with @debug.Debug::{to_repr}
+
+///|
+pub extend Status with Eq::{not_equal, equal}
+
+///|
+pub extend GenerationError with @debug.Debug::{to_repr}
+
+///|
+pub extend GenerationError with Eq::{not_equal, equal}

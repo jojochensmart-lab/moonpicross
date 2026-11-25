@@ -62,3 +62,6 @@ pub fn GenerationConfig::run(
     target=self.level,
   )
 }
+
+///|
+pub extend DifficultyReport with ToJson::{to_json}

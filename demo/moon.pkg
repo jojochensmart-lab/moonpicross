@@ -1,6 +1,7 @@
 import {
   "jojochensmart-lab/moonpicross/core",
   "moonbitlang/core/bench",
+  "moonbitlang/core/debug",
 }
 
 pkgtype(kind: "executable")

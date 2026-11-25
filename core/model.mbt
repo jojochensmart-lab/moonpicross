@@ -106,8 +106,9 @@ pub fn Puzzle::from_json(source : String) -> Result[Puzzle, PuzzleError] {
   ) catch {
     _ => return Err(InvalidFormat)
   }
+  guard value is Object(fields) else { return Err(InvalidFormat) }
   let accepted = match
-    (value.value("version"), value.value("rows"), value.value("cols")) {
+    (fields.get("version"), fields.get("rows"), fields.get("cols")) {
     (Some(version), Some(rows), Some(cols)) =>
       json_integer(version) && json_lines(rows) && json_lines(cols)
     _ => false
@@ -151,18 +152,18 @@ pub type SolverStats = Metrics
 
 ///|
 fn json_integer(value : Json) -> Bool {
-  match value.as_number() {
-    Some(n) =>
+  match value {
+    Number(n, ..) =>
       n >= -2147483648.0 && n <= 2147483647.0 && n == n.to_int().to_double()
-    None => false
+    _ => false
   }
 }
 
 ///|
 fn json_lines(value : Json) -> Bool {
-  guard value.as_array() is Some(lines) else { return false }
+  guard value is Array(lines) else { return false }
   for line in lines {
-    guard line.as_array() is Some(clues) else { return false }
+    guard line is Array(clues) else { return false }
     for clue in clues {
       if !json_integer(clue) {
         return false
@@ -171,3 +172,33 @@ fn json_lines(value : Json) -> Bool {
   }
   true
 }
+
+///|
+pub extend Cell with Eq::{not_equal, equal}
+
+///|
+pub extend Cell with @debug.Debug::{to_repr}
+
+///|
+pub extend Grid with Eq::{not_equal, equal}
+
+///|
+pub extend Grid with @debug.Debug::{to_repr}
+
+///|
+pub extend Puzzle with Eq::{not_equal, equal}
+
+///|
+pub extend Puzzle with @debug.Debug::{to_repr}
+
+///|
+pub extend Puzzle with ToJson::{to_json}
+
+///|
+pub extend PuzzleError with Eq::{not_equal, equal}
+
+///|
+pub extend PuzzleError with @debug.Debug::{to_repr}
+
+///|
+pub extend SolveStep with ToJson::{to_json}

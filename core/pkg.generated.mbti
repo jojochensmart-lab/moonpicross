@@ -27,6 +27,9 @@ pub(all) enum Cell {
   Black
   White
 } derive(Eq, @debug.Debug)
+pub fn Cell::equal(Self, Self) -> Bool
+pub fn Cell::not_equal(Self, Self) -> Bool
+pub fn Cell::to_repr(Self) -> @debug.Repr
 
 pub(all) struct DifficultyReport {
   level : String
@@ -38,6 +41,7 @@ pub(all) struct DifficultyReport {
   scans : Int32
   forced_by_round : Array[Int32]
 } derive(ToJson)
+pub fn DifficultyReport::to_json(Self) -> Json
 
 pub(all) struct Generated {
   rows : Array[Array[Int32]]
@@ -62,12 +66,18 @@ pub(all) enum GenerationError {
   AttemptLimit
   Invariant
 } derive(Eq, @debug.Debug)
+pub fn GenerationError::equal(Self, Self) -> Bool
+pub fn GenerationError::not_equal(Self, Self) -> Bool
+pub fn GenerationError::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Grid {
   height : Int32
   width : Int32
   cells : Array[Cell]
 } derive(Eq, @debug.Debug)
+pub fn Grid::equal(Self, Self) -> Bool
+pub fn Grid::not_equal(Self, Self) -> Bool
+pub fn Grid::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Limits {
   candidates : Int32
@@ -92,9 +102,13 @@ pub(all) struct Puzzle {
   rows : Array[Array[Int32]]
   cols : Array[Array[Int32]]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Puzzle::equal(Self, Self) -> Bool
 pub fn Puzzle::from_grid(Grid) -> Result[Self, PuzzleError]
 pub fn Puzzle::from_json(String) -> Result[Self, PuzzleError]
+pub fn Puzzle::not_equal(Self, Self) -> Bool
 pub fn Puzzle::solve(Self, Limits, trace? : Int32) -> Result[SolveResult, PuzzleError]
+pub fn Puzzle::to_json(Self) -> Json
+pub fn Puzzle::to_repr(Self) -> @debug.Repr
 pub fn Puzzle::validate(Self) -> Result[Unit, PuzzleError]
 
 pub(all) enum PuzzleError {
@@ -104,6 +118,9 @@ pub(all) enum PuzzleError {
   InvalidFormat
   UnsupportedVersion
 } derive(Eq, @debug.Debug)
+pub fn PuzzleError::equal(Self, Self) -> Bool
+pub fn PuzzleError::not_equal(Self, Self) -> Bool
+pub fn PuzzleError::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SolveResult {
   status : Status
@@ -121,6 +138,7 @@ pub(all) struct SolveStep {
   values : Array[Int32]
   depth : Int32
 } derive(ToJson)
+pub fn SolveStep::to_json(Self) -> Json
 
 pub(all) enum Status {
   NoSolution
@@ -129,6 +147,9 @@ pub(all) enum Status {
   Budget
   Invalid
 } derive(Eq, @debug.Debug)
+pub fn Status::equal(Self, Self) -> Bool
+pub fn Status::not_equal(Self, Self) -> Bool
+pub fn Status::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub type ColumnClue = Array[Int32]
